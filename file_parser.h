@@ -5,9 +5,16 @@
 #ifndef FILE_PARSER_H
 #define FILE_PARSER_H
 
+#include <stdio.h>
 #include <string>
+#include <vector>
+#include <iostream>     // std::cout
+#include <fstream>      // std::ifstream
+#include "file_parse_exception.h"
 
 using namespace std;
+
+typedef vector<string> row;
 
 class file_parser {
 public:
@@ -17,7 +24,7 @@ public:
     file_parser(string);
 
     // dtor
-    ~file_parser();
+    ~file_parser(){tokens.clear();};
 
     // reads the source file, storing the information is some
     // auxiliary data structure you define in the private section.
@@ -42,7 +49,13 @@ public:
     int size();
 
 private:
-    // your variables and private methods go here
+    string filename;
+    int number_of_lines;
+
+    vector<string>  contents;
+    vector<row> tokens;
+
+    void tokenize_lines();
 
 };
 
