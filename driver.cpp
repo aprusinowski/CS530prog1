@@ -15,7 +15,7 @@ int main(int argc, char **argv)
     }
 
     file_parser parser(argv[1]);
-
+    //try catch file_parser in driver
 
     parser.read_file();
     parser.print_file();

@@ -15,7 +15,7 @@ void file_parser::read_file(){
     ifstream input;
     string line;
     input.open(filename.c_str(), ios::in);
-    if(!input) throw file_parse_exception("Could not open file");
+    if(!input) throw file_parse_exception("Could not open file"); //throw exceptions in here...catch in driver
 
     while(!input.eof()){
         getline(input, line);
@@ -45,6 +45,10 @@ void file_parser::print_file(){
 
 }
 
+//put comments into index 0,3 no matter if they are only item
+
+
+
 // returns the token found at (row, column).  Rows and columns
 // are zero based.  Returns the empty string "" if there is no
 // token at that location. column refers to the four fields
@@ -67,7 +71,9 @@ void file_parser::tokenize_lines()
     const string delim = " ";
     string::size_type pos, last_pos;
 
-    row *new_row;// = new row();
+    row *new_row;
+
+    //two pass tokenizer. Break up by white space. Check comments, quotes, labels
 
     for (std::vector<string>::iterator it = contents.begin() ; it != contents.end(); ++it) {
         new_row = new row();

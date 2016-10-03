@@ -57,6 +57,10 @@ private:
 
     void tokenize_lines();
 
+    //inserts comment at the 4th position in row
+    //insert tabs into pos 0 - 3
+    void insert_comment(string);
+
 };
 
 #endif
