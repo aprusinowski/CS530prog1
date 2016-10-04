@@ -5,6 +5,8 @@
 #ifndef FILE_PARSER_H
 #define FILE_PARSER_H
 
+#include <cctype>
+#include <climits>
 #include <stdio.h>
 #include <string>
 #include <vector>
@@ -51,6 +53,7 @@ public:
 private:
     string filename;
     int number_of_lines;
+    //vector<string> temp;
 
     vector<string>  contents;
     vector<row> tokens;
@@ -59,7 +62,15 @@ private:
 
     //inserts comment at the 4th position in row
     //insert tabs into pos 0 - 3
-    void insert_comment(string);
+    //void insert_comment(string);
+    //bool process_row(row*);
+
+    bool is_comment(string);
+    bool is_valid_label(string);
+
+    //string assemble_comment(std::vector<string>::iterator, std::vector<string>::iterator);
+
+
 
 };
 
