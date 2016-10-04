@@ -114,7 +114,6 @@ void file_parser::tokenize_lines()
             last_pos = (*it).find_first_not_of(delim, pos);
             pos = (*it).find_first_of(delim, last_pos);
 
-
             //To Do handle includes
 
         }
