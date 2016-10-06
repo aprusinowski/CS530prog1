@@ -1,33 +1,58 @@
-//
-//
-//
-
-#include <cstring>
 #include "file_parser.h"
 
-int main(int argc, char **argv)
-{
-    unsigned int c,r;
+#define CONTINUE(R) (R=='Y' || R=='y')
 
-    if(argc != 2){
+int main(int argc, char **argv) {
+    unsigned int c, r;
+    char resp;
+    bool errors = false;
+
+    if (argc != 2) {
         cout << "Put the filename as the only argument" << endl;
         return 1;
     }
 
-    file_parser parser(argv[1]);
-    //try catch file_parser in driver
+    do {
 
-    parser.read_file();
-    parser.print_file();
+        file_parser *parser = new file_parser(argv[1]);
 
-    for(int i=0;i<10;i++){
-        cout<<"Row:";
-        cin >> r;
-        cout<<"Col:";
-        cin >> c;
-        cout<<parser.get_token(c,r)<<endl;
-    }
+        try {
+            parser->read_file();
+        }
+        catch (file_parse_exception &e) {
+            errors = true;
+            cout << e.getMessage() << endl;
+        }
 
+        if (!errors) {
 
+            cout << left << setw(17) << "LABELS" << setw(17) << "OPCODES" << setw(17) << "OPERANDS" << setw(17)
+                 << "COMMENTS" << endl;
+            cout << "========================================================================================" << endl;
+            parser->print_file();
+            cout << endl;
+            cout << "Number of lines processed: " << parser->size() << endl;
+
+            do {
+                cout << "Check row: ";
+                cin >> r;
+                cout << "Column: ";
+                cin >> c;
+
+                try {
+                    cout << "Token at location is: " << parser->get_token(c, r) << endl << endl;
+                }
+                catch (file_parse_exception &e) {
+                    cout << e.getMessage() << endl;
+                }
+                cout << "Check another location? (y/n): ";
+                cin >> resp;
+            } while CONTINUE(resp);
+        }
+        cout << "Run Again (Y/N): ";
+        cin >> resp;
+        delete parser;
+        errors = false;
+    } while CONTINUE(resp);
     return 0;
 }

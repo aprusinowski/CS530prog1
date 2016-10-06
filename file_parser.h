@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <iomanip>
 #include <iostream>     // std::cout
 #include <fstream>      // std::ifstream
 #include "file_parse_exception.h"
@@ -26,7 +27,7 @@ public:
     file_parser(string);
 
     // dtor
-    ~file_parser(){tokens.clear();};
+    ~file_parser(){};
 
     // reads the source file, storing the information is some
     // auxiliary data structure you define in the private section.
@@ -48,29 +49,17 @@ public:
     void print_file();
 
     // returns the number of lines in the source code file
-    int size();
+    int size() {return number_of_lines;};
 
 private:
     string filename;
-    int number_of_lines;
-    //vector<string> temp;
+    unsigned int number_of_lines;
 
     vector<string>  contents;
     vector<row> tokens;
 
     void tokenize_lines();
-
-    //inserts comment at the 4th position in row
-    //insert tabs into pos 0 - 3
-    //void insert_comment(string);
-    //bool process_row(row*);
-
-    bool is_comment(string);
     bool is_valid_label(string);
-
-    //string assemble_comment(std::vector<string>::iterator, std::vector<string>::iterator);
-
-
 
 };
 

@@ -1,144 +1,122 @@
-//
-//
-//
-
 #include "file_parser.h"
-typedef vector<string> row;
 
-file_parser::file_parser(string f_name)
-{
+#define DELIMITER " "
+#define MAX_FIELDS 3
+#define IS_COMMENT(C) (C == '*' || C == ';')
+#define NOT_NEWLINE(S)  (S->compare("\r") != 0)
+
+file_parser::file_parser(string f_name) {
     filename = f_name;
     number_of_lines = 0;
 }
 
-void file_parser::read_file(){
-
+void file_parser::read_file() {
     ifstream input;
     string line;
     input.open(filename.c_str(), ios::in);
-    if(!input) throw file_parse_exception("Could not open file"); //throw exceptions in here...catch in driver
 
-    while(!input.eof()){
-        getline(input, line);
+    if (!input)
+        throw file_parse_exception("Could not open file: " + filename);
+
+    while (getline(input, line))
         contents.push_back(line);
-        number_of_lines++;
-    }
     input.close();
     tokenize_lines();
-
 }
 
-void file_parser::print_file(){
+
+void file_parser::print_file() {
     std::vector<row>::iterator r_it;
-    std::vector<string>::iterator t_it;
+    row::iterator t_it;
+    unsigned int i = 1;
 
-    for (r_it = tokens.begin() ; r_it != tokens.end(); ++r_it)
-    {
-        for (t_it = (*r_it).begin() ; t_it != (*r_it).end(); ++t_it)
-        {
-            cout << (*t_it)<<"\t";
-        }
-        cout<<endl;
-
+    for (r_it = tokens.begin(); r_it != tokens.end(); ++r_it) {
+        cout << left << i++ << " ";
+        for (t_it = r_it->begin(); t_it != r_it->end(); ++t_it)
+            cout << left << (*t_it) << "\t\t";
+        cout << endl;
     }
-
-    std::cout << '\n';
-
+    cout << endl;
 }
 
-//put comments into index 0,3 no matter if they are only item
+string file_parser::get_token(unsigned int col, unsigned int row){
 
+    if(row > (tokens.size()-1))
+        throw file_parse_exception("Row number "+ to_string(row)+" out of bounds.\n");
+    if(col > (tokens[row].size()-1))
+        throw file_parse_exception("Row, Column number "+ to_string(row)+","+to_string(col)+" out of bounds.\n");
 
-// returns the token found at (row, column).  Rows and columns
-// are zero based.  Returns the empty string "" if there is no
-// token at that location. column refers to the four fields
-// identified above.
-string file_parser::get_token(unsigned int col, unsigned int row)
-{
-    string token ="";
-
-    if(row > (tokens.size()-1))     return token;
-    if(col > (tokens[row].size()-1))return token;
-
-    token = (tokens[row])[col];
-
-    return token;
-
+    return (tokens[row-1])[col];
 }
+
 
 void file_parser::tokenize_lines()
 {
-    unsigned int position = 0;
-    string delim = " ";
+    unsigned int field;
     string::size_type pos, last_pos, end_quote;
 
-    row *new_row;
+    for (row::iterator it = contents.begin() ; it != contents.end(); ++it) {
+        field = 0;
+        row new_row(4,"");
+        last_pos = it->find_first_not_of(DELIMITER, 0);
+        pos = it->find_first_of(DELIMITER, last_pos);
 
+        if(last_pos > 0 && field == 0)
+            field++;
 
+        if NOT_NEWLINE(it){
 
-    for (std::vector<string>::iterator it = contents.begin() ; it != contents.end(); ++it) {
-        new_row = new row(4,"");
-        position = 0;
+            while (string::npos != pos || string::npos != last_pos) {
 
-        last_pos = (*it).find_first_not_of(delim, 0);
-        pos = (*it).find_first_of(delim, last_pos);
+                string temp_string(it->substr(last_pos, pos - last_pos));
+                if(temp_string.compare("\r")==0) break;
 
-        if(last_pos > 0 && position == 0)
-            position++;
+                else if IS_COMMENT(temp_string.front()) {
+                    new_row[3] = it->substr(last_pos, it->length());
+                    break;
+                }
+                else if(field == MAX_FIELDS)
+                    throw file_parse_exception("Too many tokens on line: "+ to_string(number_of_lines + 1));
 
-        if((*it).compare("\r")!= 0)
-        while(string::npos != pos || string::npos!=last_pos){
+                else if (temp_string.at(0) == '\'' && pos < ULONG_MAX) {
+                    end_quote = it->find_first_of('\'', pos);
+                    temp_string = it->substr(last_pos, end_quote - 1);
+                    new_row[field++] = temp_string;
+                    pos = last_pos + end_quote;
 
-            string *temp_string = new string((*it).substr(last_pos, pos-last_pos));
+                }else if (last_pos == 0 && field == 0 && !is_valid_label(temp_string))
+                    throw file_parse_exception("Invalid label on line: " + to_string(number_of_lines + 1));
+                else
+                    new_row[field++] = temp_string;
 
-            if(temp_string->at(0)=='\'' && pos < ULONG_MAX) {
-                end_quote = (*it).find_first_of("\'", pos);
-                *temp_string = (*it).substr(last_pos, end_quote-1);
-                new_row->at(position) = *temp_string;
-                pos = last_pos+end_quote;
-                position++;
+                last_pos = it->find_first_not_of(DELIMITER, pos);
+                pos = it->find_first_of(DELIMITER, last_pos);
             }
-
-            else if(is_comment(*temp_string)){
-                new_row->at(3)=(*it).substr(last_pos, (*it).length());
-                break;
-            }else if(last_pos == 0 && position == 0 && !is_valid_label(*temp_string)){
-                //throw exception
-                return;
-            }
-            else{
-                new_row->at(position) = *temp_string;
-                position++;
-            }
-
-            last_pos = (*it).find_first_not_of(delim, pos);
-            pos = (*it).find_first_of(delim, last_pos);
-
-            //To Do handle includes
-
         }
-
-        tokens.push_back(*new_row);
+        tokens.push_back(new_row);
+        number_of_lines++;
     }
 }
 
 
-bool file_parser::is_comment(string s)
-{
-    return (s.front()=='*' || s.front()==';');
-}
 
-bool file_parser::is_valid_label(string s)
-{
-    if(!isalpha(s.front()))
+bool file_parser::is_valid_label(string s) {
+
+    if (isalpha(s.front()) || s.front() == '#') {
+
+        if (s.back() == '\r')
+            s = s.substr(0, s.size() - 2);
+        if (s.back() == ':')
+            s = s.substr(1, s.size() - 2);
+        else
+            s = s.substr(1);
+        for (char c: s)
+            if (!isalnum(c) && c != '\r')
+                return false;
+
+        return true;
+    } else
         return false;
-    if(s.back() == ':')
-        s.resize(s.size()-1);
 
-    for(char c: s){
-        if(!isalnum(c))
-            return false;
-    }
-    return true;
 
 }
