@@ -6,6 +6,7 @@
 
 #ifndef FILE_PARSE_EXCEPTION_H
 #define FILE_PARSE_EXCEPTION_H
+
 #include <string>
 
 using namespace std;
@@ -28,4 +29,5 @@ public:
 private:
     string message;
 };
+
 #endif

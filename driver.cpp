@@ -23,15 +23,18 @@ int main(int argc, char **argv) {
             errors = true;
             cout << e.getMessage() << endl;
         }
-
         if (!errors) {
 
-            cout << left << setw(17) << "LABELS" << setw(17) << "OPCODES" << setw(17) << "OPERANDS" << setw(17)
-                 << "COMMENTS" << endl;
-            cout << "========================================================================================" << endl;
+            cout << left << setw(14) << "    LABELS"
+                 << left << setw(10) << "OPCODES"
+                 << left << setw(10) << "OPERANDS"
+                 << left << setw(10) << "COMMENTS"
+                 << endl;
+            cout << "========================================================================================"
+                 << endl;
             parser->print_file();
             cout << endl;
-            cout << "Number of lines processed: " << parser->size() << endl;
+
 
             do {
                 cout << "Check row: ";

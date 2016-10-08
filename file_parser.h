@@ -5,6 +5,7 @@
 #ifndef FILE_PARSER_H
 #define FILE_PARSER_H
 
+#include <sstream>
 #include <cctype>
 #include <climits>
 #include <stdio.h>
@@ -17,7 +18,8 @@
 
 using namespace std;
 
-typedef vector<string> row;
+typedef vector<string> rowVect;
+typedef vector<rowVect>    allRowsVect;
 
 class file_parser {
 public:
@@ -54,13 +56,12 @@ public:
 private:
     string filename;
     unsigned int number_of_lines;
-
-    vector<string>  contents;
-    vector<row> tokens;
-
+    rowVect  contents;
+    allRowsVect tokens;
     void tokenize_lines();
     bool is_valid_label(string);
-
+//    int fieldWidths[4] = {0,0,0,0};
+//    void calcFieldWidths();
 };
 
 #endif
