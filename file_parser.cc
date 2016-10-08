@@ -53,7 +53,7 @@ void file_parser::print_file() {
             else
                 cout<<(*t_it);
         }
-        cout << endl
+        cout << endl;
     }
 
 }
