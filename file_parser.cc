@@ -1,6 +1,4 @@
 #include "file_parser.h"
-
-
 #define DELIMITER      " "
 #define NEWLINE_C      '\n'
 #define SINGLE_QUOTE   '\''
@@ -16,8 +14,6 @@
 #define CHOP_FRONT(S)              (S.substr(1))
 #define INVALID_LABEL_CHAR(C)      (!isalnum(C) && C != NEWLINE_C)
 
-
-
 file_parser::file_parser(string f_name) {
     filename = f_name;
     number_of_lines = 0;
@@ -30,7 +26,6 @@ void file_parser::read_file() {
         throw file_parse_exception("Could not open file: " + filename);
     while (getline(f_input, line))
         contents.push_back(line);
-
     number_of_lines = contents.size();
     f_input.close();
     tokenize_lines();
@@ -54,7 +49,6 @@ string file_parser::get_token(unsigned int row, unsigned int col) {
 void file_parser::tokenize_lines() {
     unsigned int field;
     string::size_type pos, last_pos, end_quote;
-
     //Iterate over the rows
     for (string row: contents) {
         field = LABEL;
@@ -109,7 +103,6 @@ bool file_parser::is_valid_label(string s) {
     for (char c: s)
         if INVALID_LABEL_CHAR(c)
             return false;
-
     return true;
 }
 
