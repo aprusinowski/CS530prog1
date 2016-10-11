@@ -1,25 +1,24 @@
-/*  file_parser.h
+/*
+  file_parser.h
     CS530, Fall 2016
 */
-
 #ifndef FILE_PARSER_H
 #define FILE_PARSER_H
-
+#include <iterator>
 #include <sstream>
 #include <cctype>
 #include <climits>
 #include <stdio.h>
 #include <string>
 #include <vector>
-#include <iomanip>
 #include <iostream>     // std::cout
 #include <fstream>      // std::ifstream
 #include "file_parse_exception.h"
 
-using namespace std;
+typedef vector<string>  rowVect;
+typedef vector<rowVect> allRowsVect;
 
-typedef vector<string> rowVect;
-typedef vector<rowVect>    allRowsVect;
+using namespace std;
 
 class file_parser {
 public:
@@ -60,8 +59,6 @@ private:
     allRowsVect tokens;
     void tokenize_lines();
     bool is_valid_label(string);
-//    int fieldWidths[4] = {0,0,0,0};
-//    void calcFieldWidths();
 };
 
 #endif

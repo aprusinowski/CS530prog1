@@ -1,5 +1,5 @@
 #include "file_parser.h"
-
+#include <iomanip>
 #define CONTINUE(R) (R=='Y' || R=='y')
 
 int main(int argc, char **argv) {
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
                 cin >> c;
 
                 try {
-                    cout << "Token at location is: " << parser->get_token(c, r) << endl << endl;
+                    cout << "Token at location is: " << parser->get_token(r,c) << endl << endl;
                 }
                 catch (file_parse_exception &e) {
                     cout << e.getMessage() << endl;
