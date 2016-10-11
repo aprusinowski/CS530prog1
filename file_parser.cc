@@ -1,18 +1,4 @@
 #include "file_parser.h"
-#define DELIMITER      " "
-#define NEWLINE_C      '\n'
-#define SINGLE_QUOTE   '\''
-#define MAX_FIELDS      3
-#define MAX_COLUMNS     4
-#define LABEL           0
-#define OPCODE          1
-#define OPERAND         2
-#define COMMENT         3
-#define IS_COMMENT(C)              (C == '*' || C == ';')
-#define INVALID_LABEL_START(S)     (!isalpha(S.front()) && s.front() != '#')
-#define CHOP_FRONT_AND_NEWLINE(S)  (S = S.substr(1, S.size() - 2))
-#define CHOP_FRONT(S)              (S.substr(1))
-#define INVALID_LABEL_CHAR(C)      (!isalnum(C) && C != NEWLINE_C)
 
 file_parser::file_parser(string f_name) {
     filename = f_name;
