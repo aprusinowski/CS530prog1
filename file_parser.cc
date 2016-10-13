@@ -32,16 +32,16 @@ string file_parser::get_token(unsigned int row, unsigned int col) {
 }
 
 void file_parser::tokenize_lines(rowVect& file_contents) {
-    unsigned int field;
+    unsigned int token_count;
     string::size_type pos, last_pos, end_quote;
     for (string row: file_contents) {                                                   //Iterate over the rows
-        field = LABEL;
+        token_count = LABEL;
         rowVect new_row(MAX_COLUMNS, "");
         last_pos = row.find_first_not_of(DELIMITER, 0);
         pos = row.find_first_of(DELIMITER, last_pos);
 
-        if (last_pos !=LABEL && field == LABEL)
-            field = OPCODE;
+        if (last_pos !=LABEL && token_count == LABEL)                                   //advance token count if leading whitespace
+            token_count = OPCODE;
 
         while (string::npos != pos || string::npos != last_pos) {                       //Tokenize source code line
             string token_str(row.substr(last_pos, pos - last_pos));
@@ -49,7 +49,7 @@ void file_parser::tokenize_lines(rowVect& file_contents) {
                 new_row[COMMENT] = row.substr(last_pos, row.length());
                 break;
             }
-            if (field == MAX_FIELDS)                                                    //check for max tokens
+            if (!(token_count < MAX_TOKENS))                                            //check for max tokens
                 throw file_parse_exception("Too many tokens on line: " + to_string(line_tokens.size() + 1));
 
             else if (pos != string::npos && token_str.find(SINGLE_QUOTE)!=string::npos){//tokens with single quotes
@@ -57,13 +57,13 @@ void file_parser::tokenize_lines(rowVect& file_contents) {
                 end_quote = (end_quote == string::npos)?pos:end_quote;
                 token_str = row.substr(last_pos, end_quote - last_pos);                 //update token up to closing quote
                 string::size_type eot = row.find_first_of(DELIMITER, end_quote);        //find end of token
-                new_row[field++] = (token_str += row.substr(end_quote, eot-end_quote)); //add remaining characters
+                new_row[token_count++] = (token_str += row.substr(end_quote, eot-end_quote)); //add remaining characters
                 pos = (string::npos == eot)? string::npos: end_quote+(eot-end_quote);
 
-            } else if (last_pos == LABEL && field == LABEL && !is_valid_label(token_str))   //check for invalid label
+            } else if (last_pos == LABEL && token_count == LABEL && !is_valid_label(token_str))   //check for invalid label
                 throw file_parse_exception("Invalid label on line: " + to_string(line_tokens.size()  + 1));
             else
-                new_row[field++] = token_str;
+                new_row[token_count++] = token_str;
             last_pos = row.find_first_not_of(DELIMITER, pos);                           //find start of next token
             pos = row.find_first_of(DELIMITER, last_pos);                               //find end of next token
         }

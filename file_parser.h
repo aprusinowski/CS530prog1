@@ -12,7 +12,7 @@
 
 #define DELIMITER      " \n\r\t"
 #define SINGLE_QUOTE   '\''
-#define MAX_FIELDS      3
+#define MAX_TOKENS      4
 #define MAX_COLUMNS     4
 #define LABEL           0
 #define OPCODE          1
