@@ -36,21 +36,21 @@ int main(int argc, char **argv) {
             cout << endl;
 
 
-            do {
-                cout << "Check row: ";
-                cin >> r;
-                cout << "Column: ";
-                cin >> c;
-
-                try {
-                    cout << "Token at location is: " << parser->get_token(r,c) << endl << endl;
-                }
-                catch (file_parse_exception &e) {
-                    cout << e.getMessage() << endl;
-                }
-                cout << "Check another location? (y/n): ";
-                cin >> resp;
-            } while CONTINUE(resp);
+//            do {
+//                cout << "Check row: ";
+//                cin >> r;
+//                cout << "Column: ";
+//                cin >> c;
+//
+//                try {
+//                    cout << "Token at location is: " << parser->get_token(r,c) << endl << endl;
+//                }
+//                catch (file_parse_exception &e) {
+//                    cout << e.getMessage() << endl;
+//                }
+//                cout << "Check another location? (y/n): ";
+//                cin >> resp;
+//            } while CONTINUE(resp);
         }
         cout << "Run Again (Y/N): ";
         cin >> resp;

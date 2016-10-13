@@ -19,8 +19,12 @@ void file_parser::read_file() {
 }
 
 void file_parser::print_file() {
+    unsigned int i = 1;
     for (rowVect row: tokens) {
-        printf("%-8s %-8s %-8s %-8s \n", row[LABEL].c_str(), row[OPCODE].c_str(), row[OPERAND].c_str(),
+        printf("%-*u:L: %-11s OC: %-11s OP: %-11s C: %-11s \n",3,i++,
+               row[LABEL].c_str(),
+               row[OPCODE].c_str(),
+               row[OPERAND].c_str(),
                row[COMMENT].c_str());
     }
 }
