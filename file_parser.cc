@@ -20,7 +20,7 @@ void file_parser::read_file() {
 
 void file_parser::print_file() {
     for (rowVect row: tokens) {
-        printf("%-2s\t %-2s\t %-2s\t %s \n", row[LABEL].c_str(), row[OPCODE].c_str(), row[OPERAND].c_str(),
+        printf("%-8s %-8s %-8s %-8s \n", row[LABEL].c_str(), row[OPCODE].c_str(), row[OPERAND].c_str(),
                row[COMMENT].c_str());
     }
 }
@@ -59,6 +59,7 @@ void file_parser::tokenize_lines() {
                 //process tokens containing chars in single quotes
             else if (pos != string::npos && token_str.find(SINGLE_QUOTE)!=string::npos){
                 end_quote = row.find_first_of(SINGLE_QUOTE, pos);
+                end_quote = (end_quote ==string::npos)?pos:end_quote;
                 token_str = row.substr(last_pos, end_quote - last_pos);
                 string::size_type eot = row.find_first_of(DELIMITER, end_quote);
                 token_str += row.substr(end_quote, eot-end_quote);
@@ -76,6 +77,7 @@ void file_parser::tokenize_lines() {
         }
         tokens.push_back(new_row);
     }
+    int i = 5;
 }
 /*remove colon at the back and the first char since
       it was already checked with INVALID_LABEL_START    */
