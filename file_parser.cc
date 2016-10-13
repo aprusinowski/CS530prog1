@@ -58,13 +58,13 @@ void file_parser::tokenize_lines() {
             if (field == MAX_FIELDS)
                 throw file_parse_exception("Too many tokens on line: " + to_string(tokens.size() + 1));
                 //process tokens containing chars in single quotes
-            else if (token_str.front() == SINGLE_QUOTE && pos < ULONG_MAX) {
+            else if (pos != string::npos && token_str.find(SINGLE_QUOTE)!=string::npos){
                 end_quote = row.find_first_of(SINGLE_QUOTE, pos);
                 token_str = row.substr(last_pos, end_quote - last_pos);
-                string::size_type eot = row.find_first_of(" \n\r\t", end_quote);
-                token_str = token_str += row.substr(end_quote, eot-end_quote);
+                string::size_type eot = row.find_first_of(DELIMITER, end_quote);
+                token_str += row.substr(end_quote, eot-end_quote);
                 new_row[field++] = token_str;
-                pos = (string::npos == eot)? eot : end_quote+(eot-end_quote);
+                pos = (string::npos == eot)? string::npos: end_quote+(eot-end_quote);
              //check for invalid label
             } else if (last_pos == 0 && field == LABEL && !is_valid_label(token_str))
                 throw file_parse_exception("Invalid label on line: " + to_string(tokens.size()  + 1));

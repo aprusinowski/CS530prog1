@@ -15,7 +15,7 @@
 #include <fstream>      // std::ifstream
 #include "file_parse_exception.h"
 
-#define DELIMITER      " "
+#define DELIMITER      " \n\r\t"
 #define NEWLINE_C      '\n'
 #define SINGLE_QUOTE   '\''
 #define MAX_FIELDS      3
