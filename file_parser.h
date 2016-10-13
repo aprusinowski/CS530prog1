@@ -4,11 +4,6 @@
 */
 #ifndef FILE_PARSER_H
 #define FILE_PARSER_H
-#include <iterator>
-#include <sstream>
-#include <cctype>
-#include <climits>
-#include <stdio.h>
 #include <string>
 #include <vector>
 #include <iostream>     // std::cout
@@ -16,7 +11,6 @@
 #include "file_parse_exception.h"
 
 #define DELIMITER      " \n\r\t"
-#define NEWLINE_C      '\n'
 #define SINGLE_QUOTE   '\''
 #define MAX_FIELDS      3
 #define MAX_COLUMNS     4
@@ -28,7 +22,7 @@
 #define INVALID_LABEL_START(S)     (!isalpha(S.front()) && s.front() != '#')
 #define CHOP_FRONT_AND_NEWLINE(S)  (S = S.substr(1, S.size() - 2))
 #define CHOP_FRONT(S)              (S.substr(1))
-#define INVALID_LABEL_CHAR(C)      (!isalnum(C) && C != NEWLINE_C)
+#define INVALID_LABEL_CHAR(C)      (!isalnum(C))
 
 
 typedef vector<string>  rowVect;
@@ -66,15 +60,16 @@ public:
     void print_file();
 
     // returns the number of lines in the source code file
-    int size() {return number_of_lines;};
+    int size() {return line_count;};
 
 private:
     string filename;
-    unsigned int number_of_lines;
-    rowVect  contents;
-    allRowsVect tokens;
-    void tokenize_lines();
+    unsigned int line_count;
+    allRowsVect line_tokens;
+
+    void tokenize_lines(rowVect&);
     bool is_valid_label(string);
 };
 
 #endif
+

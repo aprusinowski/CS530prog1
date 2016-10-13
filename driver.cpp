@@ -3,7 +3,7 @@
 #define CONTINUE(R) (R=='Y' || R=='y')
 
 int main(int argc, char **argv) {
-    unsigned int c, r;
+//    unsigned int c, r;
     char resp;
     bool errors = false;
 
@@ -25,13 +25,13 @@ int main(int argc, char **argv) {
         }
         if (!errors) {
 
-            cout << left << setw(14) << "    LABELS"
-                 << left << setw(10) << "OPCODES"
-                 << left << setw(10) << "OPERANDS"
-                 << left << setw(10) << "COMMENTS"
-                 << endl;
-            cout << "========================================================================================"
-                 << endl;
+//            cout << left << setw(14) << "    LABELS"
+//                 << left << setw(10) << "OPCODES"
+//                 << left << setw(10) << "OPERANDS"
+//                 << left << setw(10) << "COMMENTS"
+//                 << endl;
+//            cout << "========================================================================================"
+//                 << endl;
             parser->print_file();
             cout << endl;
 
@@ -52,10 +52,11 @@ int main(int argc, char **argv) {
 //                cin >> resp;
 //            } while CONTINUE(resp);
         }
+        cout << "Lines processed: "<< parser->size()<<endl;
         cout << "Run Again (Y/N): ";
         cin >> resp;
         delete parser;
-        errors = false;
+//        errors = false;
     } while CONTINUE(resp);
     return 0;
 }

@@ -1,90 +1,76 @@
-
 #include "file_parser.h"
-
-file_parser::file_parser(string f_name) {
-    filename = f_name;
-    number_of_lines = 0;
+file_parser::file_parser(string filename) {
+    this->filename = filename;
+    line_count = 0;
 }
-
 void file_parser::read_file() {
+    rowVect  file_contents;
     string line;
     ifstream f_input(filename.c_str());
     if (!f_input.is_open())
         throw file_parse_exception("Could not open file: " + filename);
     while (getline(f_input, line))
-        contents.push_back(line);
-    number_of_lines = contents.size();
+        file_contents.push_back(line);
+    line_count = file_contents.size();
     f_input.close();
-    tokenize_lines();
+    tokenize_lines(file_contents);
 }
 
 void file_parser::print_file() {
     unsigned int i = 1;
-    for (rowVect row: tokens) {
-        printf("%-*u:L: %-11s OC: %-11s OP: %-11s C: %-11s \n",3,i++,
-               row[LABEL].c_str(),
-               row[OPCODE].c_str(),
-               row[OPERAND].c_str(),
-               row[COMMENT].c_str());
-    }
+    for (rowVect row: line_tokens)
+        printf("%-*u:L: %-11s OC: %-11s OP: %-11s C: %-11s \n", 3, i++,
+               row[LABEL].c_str(),row[OPCODE].c_str(), row[OPERAND].c_str(), row[COMMENT].c_str());
 }
 
 string file_parser::get_token(unsigned int row, unsigned int col) {
-    if (row > (tokens.size()))
+    if (row > (line_tokens.size()))
         throw file_parse_exception("Row number " + to_string(row) + " out of bounds. ");
     if (col > MAX_COLUMNS)
-        throw file_parse_exception("Row, Column number " + to_string(row) + "," + to_string(col) + " out of bounds. ");
-    return (tokens[row])[col];
+        throw file_parse_exception("Row, Column number " + to_string(row) + "," + to_string(col) + " out of bounds.");
+    return (line_tokens[row])[col];
 }
 
-void file_parser::tokenize_lines() {
+void file_parser::tokenize_lines(rowVect& file_contents) {
     unsigned int field;
     string::size_type pos, last_pos, end_quote;
-    //Iterate over the rows
-    for (string row: contents) {
+    for (string row: file_contents) {                                                   //Iterate over the rows
         field = LABEL;
         rowVect new_row(MAX_COLUMNS, "");
         last_pos = row.find_first_not_of(DELIMITER, 0);
         pos = row.find_first_of(DELIMITER, last_pos);
 
-        if (last_pos > 0 && field == LABEL)
+        if (last_pos !=LABEL && field == LABEL)
             field = OPCODE;
-        //Tokenize row
-        while (string::npos != pos || string::npos != last_pos) {
+
+        while (string::npos != pos || string::npos != last_pos) {                       //Tokenize source code line
             string token_str(row.substr(last_pos, pos - last_pos));
-            //if token is a comment, store and break out of loop
-            if IS_COMMENT(token_str.front()) {
+            if IS_COMMENT(token_str.front()) {                                          //if comment,store and break out
                 new_row[COMMENT] = row.substr(last_pos, row.length());
                 break;
             }
-            //if read in max number of fields already throw an exception since the token is not a comment
-            if (field == MAX_FIELDS)
-                throw file_parse_exception("Too many tokens on line: " + to_string(tokens.size() + 1));
-                //process tokens containing chars in single quotes
-            else if (pos != string::npos && token_str.find(SINGLE_QUOTE)!=string::npos){
+            if (field == MAX_FIELDS)                                                    //check for max tokens
+                throw file_parse_exception("Too many tokens on line: " + to_string(line_tokens.size() + 1));
+
+            else if (pos != string::npos && token_str.find(SINGLE_QUOTE)!=string::npos){//tokens with single quotes
                 end_quote = row.find_first_of(SINGLE_QUOTE, pos);
-                end_quote = (end_quote ==string::npos)?pos:end_quote;
-                token_str = row.substr(last_pos, end_quote - last_pos);
-                string::size_type eot = row.find_first_of(DELIMITER, end_quote);
-                token_str += row.substr(end_quote, eot-end_quote);
-                new_row[field++] = token_str;
+                end_quote = (end_quote == string::npos)?pos:end_quote;
+                token_str = row.substr(last_pos, end_quote - last_pos);                 //update token up to closing quote
+                string::size_type eot = row.find_first_of(DELIMITER, end_quote);        //find end of token
+                new_row[field++] = (token_str += row.substr(end_quote, eot-end_quote)); //add remaining characters
                 pos = (string::npos == eot)? string::npos: end_quote+(eot-end_quote);
-             //check for invalid label
-            } else if (last_pos == 0 && field == LABEL && !is_valid_label(token_str))
-                throw file_parse_exception("Invalid label on line: " + to_string(tokens.size()  + 1));
+
+            } else if (last_pos == LABEL && field == LABEL && !is_valid_label(token_str))   //check for invalid label
+                throw file_parse_exception("Invalid label on line: " + to_string(line_tokens.size()  + 1));
             else
-                //store token in the next field position. If label, truncate to 8 chars max
                 new_row[field++] = token_str;
-            //find start and end of the next token on line
-            last_pos = row.find_first_not_of(DELIMITER, pos);
-            pos = row.find_first_of(DELIMITER, last_pos);
+            last_pos = row.find_first_not_of(DELIMITER, pos);                           //find start of next token
+            pos = row.find_first_of(DELIMITER, last_pos);                               //find end of next token
         }
-        tokens.push_back(new_row);
+        line_tokens.push_back(new_row);
     }
-    int i = 5;
 }
-/*remove colon at the back and the first char since
-      it was already checked with INVALID_LABEL_START    */
+//remove colon at the back and the first char since it was already checked with INVALID_LABEL_START
 bool file_parser::is_valid_label(string s) {
     if INVALID_LABEL_START(s)
         return false;
