@@ -34,7 +34,6 @@ string file_parser::get_token(unsigned int row, unsigned int col) {
 }
 
 void file_parser::tokenize_lines() {
-    char charary[] = " \t\n\r";
     unsigned int field;
     string::size_type pos, last_pos, end_quote;
     //Iterate over the rows
