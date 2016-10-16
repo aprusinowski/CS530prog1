@@ -49,7 +49,7 @@ void file_parser::tokenize_lines(rowVect& file_contents) {
                 new_row[COMMENT] = row.substr(last_pos, row.length());
                 break;
             }
-            if (!(token_count < MAX_TOKENS))                                            //check for max tokens
+            if (token_count == (MAX_TOKENS-1))                                            //check for max tokens
                 throw file_parse_exception("Too many tokens on line: " + to_string(line_tokens.size() + 1));
 
             else if (pos != string::npos && token_str.find(SINGLE_QUOTE)!=string::npos){//tokens with single quotes
@@ -83,3 +83,4 @@ bool file_parser::is_valid_label(string s) {
             return false;
     return true;
 }
+
