@@ -12,7 +12,6 @@
 
 file_parser::file_parser(string filename) {
     this->filename = filename;
-    line_count = 0;
 }
 /**
  *   reads the source file, storing the information is some
@@ -22,14 +21,12 @@ file_parser::file_parser(string filename) {
      specification, this is an error condition.
  */
 void file_parser::read_file() {
-    rowVect  file_contents;
     string line;
     ifstream f_input(filename.c_str());
     if (!f_input.is_open())
         throw file_parse_exception("Could not open file: " + filename);
     while (getline(f_input, line))
         file_contents.push_back(line);
-    line_count = file_contents.size();
     f_input.close();
     tokenize_lines(file_contents);
 }
@@ -68,22 +65,29 @@ void file_parser::tokenize_lines(rowVect& file_contents) {
     unsigned int current_token;
     pos_index head_pos; pos_index tail_pos;
 
+    /**Begin looping through all the source lines*/
     for (string row: file_contents) {
         current_token = LABEL;
         rowVect new_row(MAX_COLUMNS, "");
         head_pos = tail_pos = LABEL;
 
-        while (head_pos != NOT_FOUND  || NOT_FOUND != tail_pos) {                       //Tokenize source code line
+        find_next_token(row, head_pos, tail_pos );
+        while (head_pos != NOT_FOUND  || tail_pos != NOT_FOUND) {
+
             string token_str = get_next_token(row, head_pos, tail_pos);
 
+            if (tail_pos !=LABEL && current_token == LABEL)
+                current_token = OPCODE;
+
             if IS_COMMENT(token_str.front()) {                                          //if comment,store and break out
-                new_row[COMMENT] = row.substr(tail_pos, NOT_FOUND /*row.length()*/);
+                new_row[COMMENT] = row.substr(tail_pos, NOT_FOUND );
                 break;
             }
-            if (current_token == (MAX_COLUMNS-1))                                          //check for max tokens.
+            /**If max columns have already been read in throw an exception*/
+            if (current_token == (MAX_COLUMNS-1))
                 throw file_parse_exception("Too many tokens on line: " + to_string(line_tokens.size() + 1));
-
-            else if (tail_pos == LABEL && current_token == LABEL && !is_valid_label(token_str))   //check for invalid label
+            /**check for invalid label*/
+            else if (tail_pos == LABEL && current_token == LABEL && !is_valid_label(token_str))
                 throw file_parse_exception("Invalid label on line: " + to_string(line_tokens.size()  + 1));
             else
                 new_row[current_token++] = token_str;
@@ -91,6 +95,7 @@ void file_parser::tokenize_lines(rowVect& file_contents) {
             find_next_token(row, head_pos, tail_pos );
         }
         line_tokens.push_back(new_row);
+
     }
 }
 /**
@@ -122,9 +127,9 @@ string file_parser::get_next_token(const string& row, pos_index& head_pos, pos_i
     if (!(token_str.find(SINGLE_QUOTE) == NOT_FOUND)) {
         /**Try to find the closing single quote char */
         head_pos = row.find_first_of(SINGLE_QUOTE, head_pos);
-        /**If doesn't exist throw an exception*/
-        if(head_pos == NOT_FOUND)
-            throw file_parse_exception("Unterminated quoted string on line  " + to_string(line_tokens.size() + 1));
+//        /**If doesn't exist throw an exception*/
+//        if(head_pos == NOT_FOUND)
+//            throw file_parse_exception("Unterminated quoted string on line  " + to_string(line_tokens.size() + 1));
     }
 
     head_pos = row.find_first_of(DELIMITER, head_pos);

@@ -61,12 +61,12 @@ public:
     void print_file();
 
     // returns the number of lines in the source code file
-    int size() {return line_count;};
+    int size() {return file_contents.size();};
 
 private:
     string filename;
-    unsigned int line_count;
     allRowsVect line_tokens;
+    rowVect  file_contents;
 
     void tokenize_lines(rowVect&);
     void find_next_token(const string&, pos_index& , pos_index& );

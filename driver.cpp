@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
 //                 << endl;
 //            cout << "========================================================================================"
 //                 << endl;
+//            cout << parser->size()<<endl;
             parser->print_file();
             cout << endl;
 
