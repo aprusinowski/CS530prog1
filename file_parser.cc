@@ -67,24 +67,24 @@ void file_parser::tokenize_lines(rowVect& file_contents) {
 
     /**Begin looping through all the source lines*/
     for (string row: file_contents) {
-        current_token = LABEL;
+
         rowVect new_row(MAX_COLUMNS, "");
         head_pos = tail_pos = LABEL;
 
         find_next_token(row, head_pos, tail_pos );
+        /**If tail index of token is not 0, leading white space. Increment current_token*/
+        current_token = (tail_pos !=LABEL)? OPCODE: LABEL;
+
         while (head_pos != NOT_FOUND  || tail_pos != NOT_FOUND) {
 
             string token_str = get_next_token(row, head_pos, tail_pos);
 
-            if (tail_pos !=LABEL && current_token == LABEL)
-                current_token = OPCODE;
-
             if IS_COMMENT(token_str.front()) {                                          //if comment,store and break out
                 new_row[COMMENT] = row.substr(tail_pos, NOT_FOUND );
-                break;
+                head_pos = string::npos;
             }
             /**If max columns have already been read in throw an exception*/
-            if (current_token == (MAX_COLUMNS-1))
+            else if (current_token == (MAX_COLUMNS-1))
                 throw file_parse_exception("Too many tokens on line: " + to_string(line_tokens.size() + 1));
             /**check for invalid label*/
             else if (tail_pos == LABEL && current_token == LABEL && !is_valid_label(token_str))
