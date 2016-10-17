@@ -21,7 +21,7 @@
 #define COMMENT         3
 #define IS_COMMENT(C)              (C == '*' || C == ';')
 #define INVALID_LABEL_START(S)     (!isalpha(S.front()) && s.front() != '#')
-#define CHOP_FRONT_AND_NEWLINE(S)  (S = S.substr(1, S.size() - 2))
+#define CHOP_FRONT_AND_BACK(S)  (S = S.substr(1, S.size() - 2))
 #define CHOP_FRONT(S)              (S.substr(1))
 #define INVALID_LABEL_CHAR(C)      (!isalnum(C))
 
@@ -72,7 +72,6 @@ private:
     void find_next_token(const string&, pos_index& , pos_index& );
     string get_next_token(const string&,  pos_index& , pos_index& ) ;
     bool is_valid_label(string);
-    unsigned int line_number = 0;
 
 };
 

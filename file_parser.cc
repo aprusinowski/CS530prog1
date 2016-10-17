@@ -71,15 +71,11 @@ void file_parser::tokenize_lines(rowVect& file_contents) {
     for (string row: file_contents) {
         current_token = LABEL;
         rowVect new_row(MAX_COLUMNS, "");
-        head_pos = 0; pos_index tail_pos = 0;
-
-        find_next_token(row, head_pos, tail_pos );
-        /**advance token count if leading whitespace */
-        if (tail_pos !=LABEL/* && current_token == LABEL*/)
-            current_token = OPCODE;
+        head_pos = tail_pos = LABEL;
 
         while (head_pos != NOT_FOUND  || NOT_FOUND != tail_pos) {                       //Tokenize source code line
             string token_str = get_next_token(row, head_pos, tail_pos);
+
             if IS_COMMENT(token_str.front()) {                                          //if comment,store and break out
                 new_row[COMMENT] = row.substr(tail_pos, NOT_FOUND /*row.length()*/);
                 break;
@@ -95,7 +91,6 @@ void file_parser::tokenize_lines(rowVect& file_contents) {
             find_next_token(row, head_pos, tail_pos );
         }
         line_tokens.push_back(new_row);
-        line_number++;
     }
 }
 /**
@@ -110,7 +105,7 @@ void file_parser::find_next_token(const string& row, pos_index& head_pos, pos_in
 
 }
 /**
- *
+ * Function finds and returns the next complete token from the input line
  * @param row - string of the entire row from source file being tokenized
  * @param head_pos -  index position of the end of token
  * @param tail_pos - index position of the start of token
@@ -119,14 +114,19 @@ void file_parser::find_next_token(const string& row, pos_index& head_pos, pos_in
 string file_parser::get_next_token(const string& row, pos_index& head_pos, pos_index& tail_pos ) {
 
     string token_str = row.substr(tail_pos, head_pos - tail_pos);
+    /**If token_str is the last item on the line return it*/
     if(head_pos == NOT_FOUND)
         return token_str;
 
+    /**Check if there are single quote chars in the token_str*/
     if (!(token_str.find(SINGLE_QUOTE) == NOT_FOUND)) {
+        /**Try to find the closing single quote char */
         head_pos = row.find_first_of(SINGLE_QUOTE, head_pos);
+        /**If doesn't exist throw an exception*/
         if(head_pos == NOT_FOUND)
-            throw file_parse_exception("Unterminated quoted string on line  " + to_string(line_number+1));
+            throw file_parse_exception("Unterminated quoted string on line  " + to_string(line_tokens.size() + 1));
     }
+
     head_pos = row.find_first_of(DELIMITER, head_pos);
 
     return row.substr(tail_pos, head_pos - tail_pos);
@@ -137,12 +137,13 @@ string file_parser::get_next_token(const string& row, pos_index& head_pos, pos_i
  * @return - true if string s follows proper LABEL format, false otherwise
  */
 bool file_parser::is_valid_label(string s) {
+    if(s.empty())return true;
     /**Check first char. Must be a letter or a '#' for the #minclude label*/
     if INVALID_LABEL_START(s)
         return false;
     /**if last char is ':' remove it and the leading char from the string*/
     if (s.back() == ':')
-        s = CHOP_FRONT_AND_NEWLINE(s);
+        s = CHOP_FRONT_AND_BACK(s);
     /**otherwise remove leading char which was already validated*/
     else
         s = CHOP_FRONT(s);
@@ -152,3 +153,41 @@ bool file_parser::is_valid_label(string s) {
             return false;
     return true;
 }
+
+
+
+//    unsigned int current_token;
+//    pos_index head_pos; pos_index tail_pos;
+//
+//    for (string row: file_contents) {
+//        current_token = LABEL;
+//
+//        rowVect new_row(MAX_COLUMNS, "");
+//        head_pos = tail_pos = LABEL;
+//
+////        find_next_token(row, head_pos, tail_pos );
+//        /**advance token count if leading whitespace */
+////        if (tail_pos !=LABEL)
+////            current_token = OPCODE;
+//
+//        while (head_pos != NOT_FOUND  || NOT_FOUND != tail_pos) {                       //Tokenize source code line
+//            string token_str = get_next_token(row, head_pos, tail_pos);
+////            if (tail_pos !=LABEL)
+////                current_token = OPCODE;
+//            if IS_COMMENT(token_str.front()) {                                          //if comment,store and break out
+//                new_row[COMMENT] = row.substr(tail_pos, NOT_FOUND /*row.length()*/);
+//                break;
+//            }
+//            if (current_token == (MAX_COLUMNS-1))                                          //check for max tokens.
+//                throw file_parse_exception("Too many tokens on line: " + to_string(line_tokens.size() + 1));
+//
+//            else if (tail_pos == LABEL && current_token == LABEL && !is_valid_label(token_str))   //check for invalid label
+//                throw file_parse_exception("Invalid label on line: " + to_string(line_tokens.size()  + 1));
+//            else
+//                new_row[current_token++] = token_str;
+//
+//            find_next_token(row, head_pos, tail_pos );
+//        }
+//        line_tokens.push_back(new_row);
+//        line_number++;
+//    }
