@@ -8,11 +8,12 @@
 #include <vector>
 #include <iostream>     // std::cout
 #include <fstream>      // std::ifstream
+#include <cstddef>      //size_t
 #include "file_parse_exception.h"
 
+#define NOT_FOUND      string::npos
 #define DELIMITER      " \n\r\t"
-#define SINGLE_QUOTE   '\''
-#define MAX_TOKENS      4
+#define SINGLE_QUOTE   "\'"
 #define MAX_COLUMNS     4
 #define LABEL           0
 #define OPCODE          1
@@ -24,11 +25,11 @@
 #define CHOP_FRONT(S)              (S.substr(1))
 #define INVALID_LABEL_CHAR(C)      (!isalnum(C))
 
+using namespace std;
 
 typedef vector<string>  rowVect;
 typedef vector<rowVect> allRowsVect;
-
-using namespace std;
+typedef string::size_type pos_index;
 
 class file_parser {
 public:
@@ -68,8 +69,10 @@ private:
     allRowsVect line_tokens;
 
     void tokenize_lines(rowVect&);
-    string process_quotes(string& ,string&,  string::size_type& , string::size_type& ) ;
+    void find_next_token(const string&, pos_index& , pos_index& );
+    string get_next_token(const string&,  pos_index& , pos_index& ) ;
     bool is_valid_label(string);
+    unsigned int line_number = 0;
 
 };
 

@@ -1,5 +1,6 @@
 #include "file_parser.h"
 #include <iomanip>
+
 #define CONTINUE(R) (R=='Y' || R=='y')
 
 int main(int argc, char **argv) {

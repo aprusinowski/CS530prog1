@@ -52,7 +52,7 @@ void file_parser::print_file() {
      identified above.
  * @param row - Row of the input source file (0 based)
  * @param col - Column from the input row. One of the 0 - 3 columns representing Label,
- * @return
+ * @return  - token string from row, col
  */
 string file_parser::get_token(unsigned int row, unsigned int col) {
     if (row > (line_tokens.size()))
@@ -62,75 +62,93 @@ string file_parser::get_token(unsigned int row, unsigned int col) {
     return (line_tokens[row])[col];
 }
 /**
- *
- * @param file_contents
+ * @param file_contents - vector containing string objects each representing one line of unparsed text
  */
 void file_parser::tokenize_lines(rowVect& file_contents) {
-    unsigned int token_count;
-    string::size_type pos, last_pos/*, end_quote*/;
+    unsigned int current_token;
+    pos_index head_pos; pos_index tail_pos;
+
     for (string row: file_contents) {
-        token_count = LABEL;
+        current_token = LABEL;
         rowVect new_row(MAX_COLUMNS, "");
-        last_pos = row.find_first_not_of(DELIMITER, 0);
-        pos = row.find_first_of(DELIMITER, last_pos);
+        head_pos = 0; pos_index tail_pos = 0;
 
-        if (last_pos !=LABEL && token_count == LABEL)                                   //advance token count if leading whitespace
-            token_count = OPCODE;
+        find_next_token(row, head_pos, tail_pos );
+        /**advance token count if leading whitespace */
+        if (tail_pos !=LABEL/* && current_token == LABEL*/)
+            current_token = OPCODE;
 
-        while (string::npos != pos || string::npos != last_pos) {                       //Tokenize source code line
-            string token_str(row.substr(last_pos, pos - last_pos));
+        while (head_pos != NOT_FOUND  || NOT_FOUND != tail_pos) {                       //Tokenize source code line
+            string token_str = get_next_token(row, head_pos, tail_pos);
             if IS_COMMENT(token_str.front()) {                                          //if comment,store and break out
-                new_row[COMMENT] = row.substr(last_pos, row.length());
+                new_row[COMMENT] = row.substr(tail_pos, NOT_FOUND /*row.length()*/);
                 break;
             }
-            if (token_count == (MAX_TOKENS-1))                                          //check for max tokens.
+            if (current_token == (MAX_COLUMNS-1))                                          //check for max tokens.
                 throw file_parse_exception("Too many tokens on line: " + to_string(line_tokens.size() + 1));
 
-            else if (pos != string::npos && token_str.find(SINGLE_QUOTE)!=string::npos){//tokens with single quotes
-//                end_quote = row.find_first_of(SINGLE_QUOTE, pos);
-//                end_quote = (end_quote == string::npos)?pos:end_quote;
-//                token_str = row.substr(last_pos, end_quote - last_pos);                 //update token up to closing quote
-//                string::size_type eot = row.find_first_of(DELIMITER, end_quote);        //find end of token
-//                new_row[token_count++] = (token_str += row.substr(end_quote, eot-end_quote)); //add remaining characters
-                new_row[token_count++] = process_quotes(token_str, row, pos, last_pos);
-                //pos = (string::npos == eot)? string::npos: end_quote+(eot-end_quote);
-
-            } else if (last_pos == LABEL && token_count == LABEL && !is_valid_label(token_str))   //check for invalid label
+            else if (tail_pos == LABEL && current_token == LABEL && !is_valid_label(token_str))   //check for invalid label
                 throw file_parse_exception("Invalid label on line: " + to_string(line_tokens.size()  + 1));
             else
-                new_row[token_count++] = token_str;
-            last_pos = row.find_first_not_of(DELIMITER, pos);                           //find start of next token
-            pos = row.find_first_of(DELIMITER, last_pos);                               //find end of next token
+                new_row[current_token++] = token_str;
+
+            find_next_token(row, head_pos, tail_pos );
         }
         line_tokens.push_back(new_row);
+        line_number++;
     }
 }
+/**
+ * Updates the two string indexes to point to the start and end of the next token on the line
+ * @param row - string containing one complete source file row
+ * @param head_pos - points to the last char in the next token to be processed
+ * @param tail_pos - points to the first char in the next token to be processed
+ */
+void file_parser::find_next_token(const string& row, pos_index& head_pos, pos_index& tail_pos){
+    tail_pos = row.find_first_not_of(DELIMITER, head_pos);
+    head_pos = row.find_first_of(DELIMITER, tail_pos);
 
-string file_parser::process_quotes(string& token_str, string& row, string::size_type& pos, string::size_type& last_pos ){
-    string::size_type end_quote;
-    end_quote = row.find_first_of(SINGLE_QUOTE, pos);
-    end_quote = (end_quote == string::npos)?pos:end_quote;
-    token_str = row.substr(last_pos, end_quote - last_pos);                  //update token up to closing quote
-    string::size_type eot = row.find_first_of(DELIMITER, end_quote);        //find end of token
-    pos = (string::npos == eot)? string::npos: end_quote+(eot-end_quote);
 }
-
-//remove colon at the back and the first char since it was already checked with INVALID_LABEL_START
 /**
  *
- * @param s
- * @return
+ * @param row - string of the entire row from source file being tokenized
+ * @param head_pos -  index position of the end of token
+ * @param tail_pos - index position of the start of token
+ * @return  - string consisting of the fully assembled token
+ */
+string file_parser::get_next_token(const string& row, pos_index& head_pos, pos_index& tail_pos ) {
+
+    string token_str = row.substr(tail_pos, head_pos - tail_pos);
+    if(head_pos == NOT_FOUND)
+        return token_str;
+
+    if (!(token_str.find(SINGLE_QUOTE) == NOT_FOUND)) {
+        head_pos = row.find_first_of(SINGLE_QUOTE, head_pos);
+        if(head_pos == NOT_FOUND)
+            throw file_parse_exception("Unterminated quoted string on line  " + to_string(line_number+1));
+    }
+    head_pos = row.find_first_of(DELIMITER, head_pos);
+
+    return row.substr(tail_pos, head_pos - tail_pos);
+}
+/**
+ *  Check a string for proper LABEL format
+ * @param s - string being checked for proper LABEL format
+ * @return - true if string s follows proper LABEL format, false otherwise
  */
 bool file_parser::is_valid_label(string s) {
+    /**Check first char. Must be a letter or a '#' for the #minclude label*/
     if INVALID_LABEL_START(s)
         return false;
+    /**if last char is ':' remove it and the leading char from the string*/
     if (s.back() == ':')
         s = CHOP_FRONT_AND_NEWLINE(s);
+    /**otherwise remove leading char which was already validated*/
     else
         s = CHOP_FRONT(s);
+    /**check remaining characters in the string with isalnum()*/
     for (char c: s)
         if INVALID_LABEL_CHAR(c)
             return false;
     return true;
 }
-
