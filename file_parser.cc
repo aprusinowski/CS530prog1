@@ -110,7 +110,7 @@ string file_parser::process_quotes(string& token_str, string& row, string::size_
     string::size_type end_quote;
     end_quote = row.find_first_of(SINGLE_QUOTE, pos);
     end_quote = (end_quote == string::npos)?pos:end_quote;
-    token_str = row.substr(last_pos, end_quote - last_pos);                 //update token up to closing quote
+    token_str = row.substr(last_pos, end_quote - last_pos);                  //update token up to closing quote
     string::size_type eot = row.find_first_of(DELIMITER, end_quote);        //find end of token
     pos = (string::npos == eot)? string::npos: end_quote+(eot-end_quote);
 }

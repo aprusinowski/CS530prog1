@@ -68,7 +68,7 @@ private:
     allRowsVect line_tokens;
 
     void tokenize_lines(rowVect&);
-    string process_quotes(string& ,string&,  string::size_type& , string::size_type& );
+    string process_quotes(string& ,string&,  string::size_type& , string::size_type& ) ;
     bool is_valid_label(string);
 
 };
