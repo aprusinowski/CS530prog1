@@ -1,9 +1,12 @@
 /*
  * Artur Prusinowski, Anas Khafagi, Justin Waymire
  * Edoras account: cssc0631
+ * Assignment 1
+ *
   file_parser.h
   CS530, Fall 2016
 */
+
 #ifndef FILE_PARSER_H
 #define FILE_PARSER_H
 #include <string>
@@ -80,7 +83,7 @@ public:
     /***
      * @return  returns the number of lines in the source code file
      */
-    int size() {return file_contents.size();};
+    int size() {return line_tokens.size();};
 
 private:
     /**source file file name*/

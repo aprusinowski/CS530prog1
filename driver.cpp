@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
 
         try {
             parser->read_file();
+            parser->print_file();
         }
         catch (file_parse_exception &e) {
             errors = true;
@@ -28,7 +29,7 @@ int main(int argc, char **argv) {
 
 
         }
-        parser->print_file();
+
         cout << "Lines processed: "<< parser->size()<<endl;
 
         cout << "Run Again (Y/N): ";
